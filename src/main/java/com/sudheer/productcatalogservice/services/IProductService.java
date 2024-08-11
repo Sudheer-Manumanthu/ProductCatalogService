@@ -1,13 +1,12 @@
 package com.sudheer.productcatalogservice.services;
 
-import com.sudheer.productcatalogservice.dtos.FakeStoreProductDto;
 import com.sudheer.productcatalogservice.models.Product;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-public interface IproductService {
+public interface IProductService {
     public List<Product> getAllProducts();
     public Product getProductById(Long id);
     public Product createProduct(Product product);
+    public Product replaceProduct(Product product, Long id);
 }

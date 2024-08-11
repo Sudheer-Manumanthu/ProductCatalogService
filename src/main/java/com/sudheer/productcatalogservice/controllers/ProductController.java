@@ -6,7 +6,7 @@ import com.sudheer.productcatalogservice.dtos.FakeStoreProductDto;
 import com.sudheer.productcatalogservice.dtos.ProductDto;
 import com.sudheer.productcatalogservice.models.Category;
 import com.sudheer.productcatalogservice.models.Product;
-import com.sudheer.productcatalogservice.services.FakeStoreProductService;
+import com.sudheer.productcatalogservice.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,37 +19,68 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequestMapping("/product")
 public class ProductController {
 
     @Autowired
-    FakeStoreProductService fakeStoreProductService;
+    IProductService IProductService;
 
-    @GetMapping("/product")
+    @GetMapping()
     public List<ProductDto> getProducts() {
-        return null;
+        List<Product> products = IProductService.getAllProducts();
+        List<ProductDto> productDtos = new ArrayList<>();
+        for (Product product : products) {
+            productDtos.add(getProductDto(product));
+        }
+        return productDtos;
     }
 
-    @GetMapping("/product/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long productId) {
-        try{
-            if (productId == null) {
-                throw new IllegalArgumentException();
-            }
-            ProductDto productDto = getProductDto(fakeStoreProductService.getProductById(productId));
-            MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-            headers.add("CreatedBy", "Sudheer");
-            return new ResponseEntity<>(productDto, headers, HttpStatus.OK);
+        if (productId == 0) {
+            throw new IllegalArgumentException("Product id cannot be 0");
         }
-        catch (Exception e) {
-            //e.printStackTrace();
-            //return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+        ProductDto productDto = getProductDto(IProductService.getProductById(productId));
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("CreatedBy", "Sudheer");
+        return new ResponseEntity<>(productDto, headers, HttpStatus.OK);
     }
 
-    @PostMapping("/product")
-    public ProductDto createProduct(@RequestBody ProductDto product) {
-        return null;
+    @PostMapping()
+    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto product) {
+        Product input = getProduct(product);
+        Product response = IProductService.createProduct(input);
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("CreatedBy", "Sudheer");
+        return new ResponseEntity<>(getProductDto(response), headers, HttpStatus.OK);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<ProductDto> replaceProduct(@RequestBody ProductDto product, @PathVariable Long id) {
+
+        if (id == 0) {
+            throw new IllegalArgumentException("Product id cannot be 0");
+        }
+        Product input = getProduct(product);
+        Product response = IProductService.replaceProduct(input, id);
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("CreatedBy", "Sudheer");
+        return new ResponseEntity<>(getProductDto(response), headers, HttpStatus.OK);
+    }
+
+    private Product getProduct(ProductDto productDto) {
+        Product product = new Product();
+        //product.setId(productDto.getId());
+        product.setName(productDto.getName());
+        product.setPrice(productDto.getPrice());
+        product.setImageUrl(productDto.getImageUrl());
+        product.setDescription(productDto.getDescription());
+        if(productDto.getCategory() != null) {
+            Category category = new Category();
+            category.setName(productDto.getCategory().getName());
+            product.setCategory(category);
+        }
+        return product;
     }
 
     private ProductDto getProductDto(Product product) {
@@ -67,5 +98,7 @@ public class ProductController {
         }
         return productDto;
     }
+
+
 
 }
