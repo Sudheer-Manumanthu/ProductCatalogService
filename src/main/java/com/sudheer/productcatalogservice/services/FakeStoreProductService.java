@@ -6,6 +6,7 @@ import com.sudheer.productcatalogservice.models.Category;
 import com.sudheer.productcatalogservice.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+//@Primary
 public class FakeStoreProductService implements IProductService{
 
     @Autowired
